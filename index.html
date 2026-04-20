@@ -63,15 +63,6 @@
 
     .card-title { font-size: 15px; font-weight: 500; margin-bottom: .75rem; }
 
-    .who-bar {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .who-bar label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
-
     .row   { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; }
     .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 140px; }
     .field label { font-size: 12px; color: var(--text-secondary); }
@@ -256,19 +247,17 @@
     <p class="subtitle">Post a meal · sign up to eat, cook, or clean</p>
   </header>
 
-  <div class="who-bar">
-    <label for="my-name">Your name:</label>
-    <input type="text" id="my-name" placeholder="Enter your name…" style="max-width:200px;width:auto;flex:1">
-    <button onclick="saveName()">Save</button>
-    <span id="name-confirm" class="ok"></span>
-  </div>
-
   <div class="card">
     <div class="card-title">Post a meal</div>
 
     <div class="field" style="margin-bottom:8px">
+      <label for="my-name">Your name</label>
+      <input type="text" id="my-name" placeholder="e.g. Emma" style="max-width:220px">
+    </div>
+
+    <div class="field" style="margin-bottom:8px">
       <label>Date &amp; time</label>
-      <input type="datetime-local" id="new-dt" style="max-width:260px">
+      <input type="datetime-local" id="new-dt" step="900" style="max-width:260px">
     </div>
 
     <div class="field" style="margin-bottom:6px">
@@ -304,7 +293,7 @@
 <script>
   // ── CONFIG ────────────────────────────────────────────────────────────────
   const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
-  const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZW90eGJobHZ6andtdnBrYXB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTQ5NTEsImV4cCI6MjA5MjI5MDk1MX0.EMWBR3fare6e8MXQgFugxJNUDp0e9D7cZ9ccFqONnVs';
   // ─────────────────────────────────────────────────────────────────────────
 
   const db   = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -392,17 +381,6 @@
 
   // ── ACTIONS ───────────────────────────────────────────────────────────────
 
-  function saveName() {
-    const v = document.getElementById('my-name').value.trim();
-    if (!v) return;
-    myName = v;
-    localStorage.setItem('hcook_name', myName);
-    const el = document.getElementById('name-confirm');
-    el.textContent = 'Saved!';
-    setTimeout(() => el.textContent = '', 2000);
-    render();
-  }
-
   async function postMeal() {
     const name   = document.getElementById('my-name').value.trim();
     const dt     = document.getElementById('new-dt').value;
@@ -428,7 +406,7 @@
       cleaning: [],
     });
 
-    // reset form
+    // reset form (keep name filled in for convenience)
     document.getElementById('dish-list').innerHTML = '';
     addDishRow();
     document.getElementById('new-dt').value    = '';
@@ -436,7 +414,12 @@
   }
 
   async function toggle(mealId, list) {
-    if (!myName) { alert('Set your name at the top first.'); return; }
+    if (!myName) {
+      const v = window.prompt('What\'s your name?');
+      if (!v || !v.trim()) return;
+      myName = v.trim();
+      localStorage.setItem('hcook_name', myName);
+    }
     const row  = meals.find(m => m.id === mealId);
     if (!row) return;
     const meal = rowToMeal(row);
