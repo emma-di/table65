@@ -32,12 +32,36 @@
       color: var(--text);
       background: var(--bg-page);
       min-height: 100vh;
-      padding: 2rem 1rem 4rem;
+      padding: 2rem 1rem 0;
     }
 
     .container { max-width: 720px; margin: 0 auto; }
 
-    header { margin-bottom: 2rem; }
+    header { margin-bottom: 1rem; }
+
+    .norms {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      padding: .75rem 1rem;
+      background: rgba(46,42,40,0.04);
+      border-radius: var(--radius);
+      border-left: 2px solid var(--accent-light);
+    }
+
+    .norms ul {
+      padding-left: 1.1rem;
+    }
+
+    .norms li { margin-bottom: .1rem; }
+
+    .norms-heading {
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: .2rem;
+      font-size: 12px;
+    }
 
     h1 { font-size: 24px; font-weight: 500; letter-spacing: -.3px; }
 
@@ -96,6 +120,8 @@
       cursor: pointer;
       white-space: nowrap;
       transition: background .12s, transform .1s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     button:hover  { background: var(--bg-secondary); }
     button:active { transform: scale(0.98); }
@@ -229,9 +255,16 @@
 
     .day-header {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 10px;
       margin-bottom: .6rem;
+    }
+
+    .day-header::after {
+      content: '';
+      flex: 1;
+      height: 0.5px;
+      background: var(--border-md);
     }
 
     .day-name {
@@ -261,22 +294,64 @@
       background: #ffffff;
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
       margin: 1.5rem -1rem 0;
-      padding: 1.5rem 1rem 2rem;
+      padding: 1.5rem 1rem 6rem;
       border-top: 0.5px solid var(--border-md);
+      min-height: calc(100vh - 12rem);
     }
 
     .upcoming-section .section-title {
-      font-size: 13px;
+      font-size: 20px;
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      color: var(--text-secondary);
+      letter-spacing: -.2px;
+      color: var(--text);
       margin-bottom: 1.25rem;
     }
 
     .upcoming-section .card {
       background: var(--bg-page);
       border-color: rgba(46,42,40,0.10);
+    }
+
+    .allergen-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .allergen-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border-md);
+      background: var(--bg);
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .12s, border-color .12s;
+    }
+
+    .allergen-tag input[type=checkbox] { display: none; }
+
+    .allergen-tag.checked {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    .allergen-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      border: 0.5px solid var(--accent);
     }
 
     .past-section { margin-top: 2rem; }
@@ -296,6 +371,20 @@
     <h1>Table 65 <span class="sync-dot" id="sync-dot" title="Connected"></span></h1>
     <p class="subtitle">Post a meal · sign up to eat, cook, or clean</p>
   </header>
+
+  <div class="norms">
+    <p class="norms-heading">How it works</p>
+    <ul>
+      <li>A head cook posts a meal — everyone can see it and sign up to eat, help cook, or clean.</li>
+      <li>To unsign up, just tap the same button again.</li>
+      <li>Signups close before the meal (set by the cook) so they know how much to buy.</li>
+    </ul>
+    <p class="norms-heading" style="margin-top:.6rem">House norms</p>
+    <ul>
+      <li>If you sign up to eat, please also sign up to help cook or clean.</li>
+      <li>The head cook will let the group know if there's a cost for groceries.</li>
+    </ul>
+  </div>
 
   <div class="card">
     <div class="card-title">Post a meal</div>
@@ -340,9 +429,21 @@
       <button class="ghost-sm" onclick="addDishRow()">+ add item</button>
     </div>
 
+    <div class="field" style="margin-bottom:8px">
+      <label>Allergens &amp; dietary info (optional)</label>
+    </div>
+    <div class="allergen-grid" id="allergen-grid">
+      <label class="allergen-tag" onclick="toggleTag(this)"><input type="checkbox" value="Nuts"> Nuts</label>
+      <label class="allergen-tag" onclick="toggleTag(this)"><input type="checkbox" value="Gluten"> Gluten</label>
+      <label class="allergen-tag" onclick="toggleTag(this)"><input type="checkbox" value="Dairy"> Dairy</label>
+      <label class="allergen-tag" onclick="toggleTag(this)"><input type="checkbox" value="Eggs"> Eggs</label>
+      <label class="allergen-tag" onclick="toggleTag(this)"><input type="checkbox" value="Shellfish"> Shellfish</label>
+      <label class="allergen-tag" onclick="toggleTag(this)"><input type="checkbox" value="Soy"> Soy</label>
+      <label class="allergen-tag" onclick="toggleTag(this)"><input type="checkbox" value="Vegan"> Vegan</label>
+      <label class="allergen-tag" onclick="toggleTag(this)"><input type="checkbox" value="Vegetarian"> Vegetarian</label>
+    </div>
     <div class="field" style="margin-bottom:12px">
-      <label for="new-notes">Allergens / dietary info (optional)</label>
-      <input type="text" id="new-notes" placeholder="e.g. contains nuts, gluten-free, vegan">
+      <input type="text" id="new-notes" placeholder="Anything else e.g. low spice, no onions…">
     </div>
 
     <button class="primary" onclick="postMeal()">Post this meal</button>
@@ -409,6 +510,25 @@
     })).filter(d => d.name);
   }
 
+  function toggleTag(label) {
+    const cb = label.querySelector('input[type=checkbox]');
+    cb.checked = !cb.checked;
+    label.classList.toggle('checked', cb.checked);
+  }
+
+  function getTags() {
+    return [...document.querySelectorAll('#allergen-grid input[type=checkbox]')]
+      .filter(cb => cb.checked)
+      .map(cb => cb.value);
+  }
+
+  function resetTags() {
+    document.querySelectorAll('#allergen-grid .allergen-tag').forEach(t => {
+      t.querySelector('input').checked = false;
+      t.classList.remove('checked');
+    });
+  }
+
   // seed one empty row on load
   addDishRow();
 
@@ -437,9 +557,10 @@
       id:           meal.id,
       dishes:       meal.dishes,
       dt:           meal.dt,
-      meal_type:    meal.meal_type || 'Dinner',
+      meal_type:    meal.meal_type    || 'Dinner',
       cutoff_hours: meal.cutoff_hours ?? 24,
-      notes:        meal.notes || '',
+      tags:         meal.tags         || [],
+      notes:        meal.notes        || '',
       cook:         meal.cook,
       eating:       meal.eating,
       helping:      meal.helping,
@@ -461,6 +582,7 @@
     const meal_t    = document.getElementById('new-meal').value;
     const cutoff_h  = parseInt(document.getElementById('new-cutoff').value);
     const notes     = document.getElementById('new-notes').value.trim();
+    const tags      = getTags();
     const dishes = getDishes();
     const err    = document.getElementById('post-err');
 
@@ -479,6 +601,7 @@
       dt:           new Date(date).toISOString(),
       meal_type:    meal_t,
       cutoff_hours: cutoff_h,
+      tags,
       eating:       [name],
       helping:      [],
       cleaning:     [],
@@ -490,6 +613,7 @@
     document.getElementById('dish-list').innerHTML = '';
     addDishRow();
     document.getElementById('new-notes').value = '';
+    resetTags();
   }
 
   async function toggle(mealId, list) {
@@ -527,7 +651,8 @@
       dt:           row.dt,
       meal_type:    row.meal_type    || 'Dinner',
       cutoff_hours: row.cutoff_hours ?? 24,
-      notes:        row.notes,
+      tags:         row.tags         || [],
+      notes:        row.notes        || '',
       cook:         row.cook,
       eating:       row.eating       || [],
       helping:      row.helping      || [],
@@ -596,7 +721,8 @@
           <div class="meal-title">${esc(meal.meal_type)} · ${esc(dishTitle(meal.dishes))}</div>
           <div class="meal-meta">Head cook: <strong>${esc(meal.cook)}</strong></div>
           ${meal.dishes.length > 1 ? `<div class="dish-tags">${dishTagsHtml}</div>` : ''}
-          ${meal.notes ? `<div class="meal-meta" style="margin-top:4px">⚠ ${esc(meal.notes)}</div>` : ''}
+          ${meal.tags && meal.tags.length ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${meal.tags.map(t => `<span class="allergen-badge">${esc(t)}</span>`).join('')}</div>` : ''}
+          ${meal.notes ? `<div class="meal-meta" style="margin-top:4px">${esc(meal.notes)}</div>` : ''}
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <span class="badge ${locked ? 'locked' : 'open'}">${locked ? 'Signups closed' : 'Signups open'}</span>
