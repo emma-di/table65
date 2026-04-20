@@ -225,6 +225,34 @@
     .err     { font-size: 12px; color: var(--accent); margin-top: 6px; min-height: 18px; }
     .ok      { font-size: 12px; color: #3b6d11; }
 
+    .day-section { margin-bottom: 1.75rem; }
+
+    .day-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: .6rem;
+    }
+
+    .day-name {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .day-name.today { color: var(--accent); }
+
+    .day-date {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .day-empty {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      font-style: italic;
+      padding: .5rem 0 .5rem .25rem;
+    }
+
     .section-title { font-size: 16px; font-weight: 500; margin-bottom: .75rem; }
     .no-meals      { color: var(--text-secondary); font-size: 14px; padding: .5rem 0; }
     .loading       { color: var(--text-secondary); font-size: 14px; padding: 1.5rem 0; }
@@ -255,9 +283,31 @@
       <input type="text" id="my-name" placeholder="e.g. Gerrard" style="max-width:220px">
     </div>
 
-    <div class="field" style="margin-bottom:8px">
-      <label>Date &amp; time</label>
-      <input type="datetime-local" id="new-dt" step="900" style="max-width:260px">
+    <div class="row" style="margin-bottom:8px">
+      <div class="field" style="max-width:180px">
+        <label for="new-date">Date</label>
+        <input type="date" id="new-date">
+      </div>
+      <div class="field" style="max-width:160px">
+        <label for="new-meal">Meal</label>
+        <select id="new-meal">
+          <option value="Breakfast">Breakfast</option>
+          <option value="Brunch">Brunch</option>
+          <option value="Lunch">Lunch</option>
+          <option value="Dinner" selected>Dinner</option>
+          <option value="Late night">Late night</option>
+        </select>
+      </div>
+      <div class="field" style="max-width:170px">
+        <label for="new-cutoff">Signups close</label>
+        <select id="new-cutoff">
+          <option value="24" selected>24 hrs before (default)</option>
+          <option value="12">12 hrs before</option>
+          <option value="6">6 hrs before</option>
+          <option value="3">3 hrs before</option>
+          <option value="1">1 hr before</option>
+        </select>
+      </div>
     </div>
 
     <div class="field" style="margin-bottom:6px">
@@ -317,7 +367,7 @@
 
     row.innerHTML = `
       <select class="dish-label">${opts}</select>
-      <input type="text" class="dish-name" placeholder="e.g. tomato egg stir fry" value="${esc(name)}">
+      <input type="text" class="dish-name" placeholder="e.g. Fish & Chips" value="${esc(name)}">
       <button class="remove" onclick="removeDishRow(this)" title="Remove">×</button>
     `;
     list.appendChild(row);
@@ -362,14 +412,16 @@
 
   async function upsertMeal(meal) {
     const { error } = await db.from('meals').upsert({
-      id:       meal.id,
-      dishes:   meal.dishes,
-      dt:       meal.dt,
-      notes:    meal.notes || '',
-      cook:     meal.cook,
-      eating:   meal.eating,
-      helping:  meal.helping,
-      cleaning: meal.cleaning,
+      id:           meal.id,
+      dishes:       meal.dishes,
+      dt:           meal.dt,
+      meal_type:    meal.meal_type || 'Dinner',
+      cutoff_hours: meal.cutoff_hours ?? 24,
+      notes:        meal.notes || '',
+      cook:         meal.cook,
+      eating:       meal.eating,
+      helping:      meal.helping,
+      cleaning:     meal.cleaning,
     });
     if (error) { console.error(error); setOffline(); }
   }
@@ -383,33 +435,38 @@
 
   async function postMeal() {
     const name   = document.getElementById('my-name').value.trim();
-    const dt     = document.getElementById('new-dt').value;
-    const notes  = document.getElementById('new-notes').value.trim();
+    const date      = document.getElementById('new-date').value;
+    const meal_t    = document.getElementById('new-meal').value;
+    const cutoff_h  = parseInt(document.getElementById('new-cutoff').value);
+    const notes     = document.getElementById('new-notes').value.trim();
     const dishes = getDishes();
     const err    = document.getElementById('post-err');
 
-    if (!name)                     { err.textContent = 'Set your name first.'; return; }
-    if (!dt)                       { err.textContent = 'Pick a date and time.'; return; }
-    if (new Date(dt) < new Date()) { err.textContent = 'Pick a future date and time.'; return; }
-    if (!dishes.length)            { err.textContent = 'Add at least one dish.'; return; }
+    if (!name)                       { err.textContent = 'Set your name first.'; return; }
+    if (!date)                       { err.textContent = 'Pick a date.'; return; }
+    if (new Date(date) < new Date(new Date().toDateString())) { err.textContent = 'Pick a future date.'; return; }
+    if (!dishes.length)              { err.textContent = 'Add at least one dish.'; return; }
 
     err.textContent = '';
     myName = name;
     localStorage.setItem('hcook_name', myName);
 
     await upsertMeal({
-      id:       Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-      dishes,   notes,   cook: name,
-      dt:       new Date(dt).toISOString(),
-      eating:   [name],
-      helping:  [],
-      cleaning: [],
+      id:           Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+      dishes,       notes,   cook: name,
+      dt:           new Date(date).toISOString(),
+      meal_type:    meal_t,
+      cutoff_hours: cutoff_h,
+      eating:       [name],
+      helping:      [],
+      cleaning:     [],
     });
 
-    // reset form (keep name filled in for convenience)
+    document.getElementById('new-date').value  = '';
+    document.getElementById('new-meal').value  = 'Dinner';
+    document.getElementById('new-cutoff').value = '24';
     document.getElementById('dish-list').innerHTML = '';
     addDishRow();
-    document.getElementById('new-dt').value    = '';
     document.getElementById('new-notes').value = '';
   }
 
@@ -443,14 +500,16 @@
 
   function rowToMeal(row) {
     return {
-      id:       row.id,
-      dishes:   row.dishes   || [],
-      dt:       row.dt,
-      notes:    row.notes,
-      cook:     row.cook,
-      eating:   row.eating   || [],
-      helping:  row.helping  || [],
-      cleaning: row.cleaning || [],
+      id:           row.id,
+      dishes:       row.dishes       || [],
+      dt:           row.dt,
+      meal_type:    row.meal_type    || 'Dinner',
+      cutoff_hours: row.cutoff_hours ?? 24,
+      notes:        row.notes,
+      cook:         row.cook,
+      eating:       row.eating       || [],
+      helping:      row.helping      || [],
+      cleaning:     row.cleaning     || [],
     };
   }
 
@@ -461,11 +520,13 @@
   }
 
   function isLocked(meal) {
-    return Date.now() >= new Date(meal.dt).getTime() - 24 * 60 * 60 * 1000;
+    const hours = meal.cutoff_hours ?? 24;
+    return Date.now() >= new Date(meal.dt).getTime() - hours * 3600000;
   }
 
   function cutoffText(meal) {
-    const cutoff = new Date(meal.dt).getTime() - 24 * 60 * 60 * 1000;
+    const hours  = meal.cutoff_hours ?? 24;
+    const cutoff = new Date(meal.dt).getTime() - hours * 3600000;
     const diff   = cutoff - Date.now();
     if (diff <= 0) return null;
     const h = Math.floor(diff / 3600000);
@@ -474,10 +535,10 @@
     return `Signup closes in ${h}h ${m}m`;
   }
 
-  function fmt(dtStr) {
-    const d = new Date(dtStr);
-    return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-      + ' at ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  function fmt(meal) {
+    const d = new Date(meal.dt);
+    const date = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    return `${date} · ${meal.meal_type || 'Dinner'}`;
   }
 
   function esc(s) {
@@ -510,10 +571,8 @@
     return `<div class="card">
       <div class="meal-header">
         <div>
-          <div class="meal-title">${esc(dishTitle(meal.dishes))}</div>
-          <div class="meal-meta">
-            ${fmt(meal.dt)} &nbsp;·&nbsp; Head cook: <strong>${esc(meal.cook)}</strong>
-          </div>
+          <div class="meal-title">${esc(meal.meal_type)} · ${esc(dishTitle(meal.dishes))}</div>
+          <div class="meal-meta">Head cook: <strong>${esc(meal.cook)}</strong></div>
           ${meal.dishes.length > 1 ? `<div class="dish-tags">${dishTagsHtml}</div>` : ''}
           ${meal.notes ? `<div class="meal-meta" style="margin-top:4px">⚠ ${esc(meal.notes)}</div>` : ''}
         </div>
@@ -558,16 +617,54 @@
     </div>`;
   }
 
+  function dayKey(dtStr) {
+    const d = new Date(dtStr);
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  }
+
   function render() {
-    const now      = Date.now();
-    const upcoming = meals.filter(m => new Date(m.dt).getTime() > now - 3600000);
-    const past     = meals.filter(m => new Date(m.dt).getTime() <= now - 3600000);
+    const now  = new Date();
+    const todayKey = dayKey(now.toISOString());
 
-    document.getElementById('meals-list').innerHTML = upcoming.length
-      ? upcoming.map(mealCard).join('')
-      : '<div class="no-meals">No meals posted yet — be the first to cook!</div>';
+    // build 7-day window starting today
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now);
+      d.setDate(now.getDate() + i);
+      return d;
+    });
 
-    const ps = document.getElementById('past-section');
+    // group upcoming meals by day
+    const byDay = {};
+    meals.forEach(row => {
+      const k = dayKey(row.dt);
+      if (!byDay[k]) byDay[k] = [];
+      byDay[k].push(row);
+    });
+
+    const html = days.map(d => {
+      const k      = dayKey(d.toISOString());
+      const isToday = k === todayKey;
+      const label  = isToday ? 'Today' : d.toLocaleDateString('en-GB', { weekday: 'long' });
+      const sub    = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      const dayMeals = (byDay[k] || []).filter(m => new Date(m.dt).getTime() > now - 3600000);
+
+      return `<div class="day-section">
+        <div class="day-header">
+          <span class="day-name${isToday ? ' today' : ''}">${label}</span>
+          <span class="day-date">${sub}</span>
+        </div>
+        ${dayMeals.length
+          ? dayMeals.map(mealCard).join('')
+          : '<div class="day-empty">No meal posted yet</div>'
+        }
+      </div>`;
+    }).join('');
+
+    document.getElementById('meals-list').innerHTML = html;
+
+    // past meals
+    const past = meals.filter(m => new Date(m.dt).getTime() <= now - 3600000);
+    const ps   = document.getElementById('past-section');
     if (past.length) {
       ps.style.display = '';
       document.getElementById('past-list').innerHTML = [...past].reverse().map(mealCard).join('');
