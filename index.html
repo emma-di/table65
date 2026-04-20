@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table 65</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-page:        #dde1ea;
+      --bg:             #f5f3ee;
+      --bg-secondary:   #e8e4dc;
+      --accent:         #b5534a;
+      --accent-light:   #f0dbd9;
+      --accent-dark:    #8a3c35;
+      --stone:          #c9b99a;
+      --stone-light:    #ede7dc;
+      --text:           #2e2a28;
+      --text-secondary: #6b6460;
+      --text-tertiary:  #9e9894;
+      --border:         rgba(46,42,40,0.10);
+      --border-md:      rgba(46,42,40,0.18);
+      --radius:         8px;
+      --radius-lg:      12px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      font-size: 15px;
+      color: var(--text);
+      background: var(--bg-page);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header { margin-bottom: 2rem; }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -.3px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: .25rem;
+    }
+
+    .sync-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #639922;
+      margin-left: 7px;
+      vertical-align: middle;
+    }
+
+    .sync-dot.offline { background: var(--accent); }
+
+    .card {
+      background: var(--bg);
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-title { font-size: 15px; font-weight: 500; margin-bottom: .75rem; }
+
+    .who-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .who-bar label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+
+    .row   { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; }
+    .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 140px; }
+    .field label { font-size: 12px; color: var(--text-secondary); }
+
+    input, select {
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      width: 100%;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+
+    button {
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      background: transparent;
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .12s, transform .1s;
+    }
+
+    button:hover  { background: var(--bg-secondary); }
+    button:active { transform: scale(0.98); }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent-dark);
+    }
+
+    button.primary:hover { background: var(--accent-dark); }
+
+    button.active {
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      border-color: var(--accent);
+    }
+
+    button.active-clean {
+      background: var(--stone-light);
+      color: #5a4a30;
+      border-color: var(--stone);
+    }
+
+    button.danger {
+      color: var(--accent);
+      border-color: var(--accent-light);
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+    }
+
+    .badge.open   { background: var(--accent-light); color: var(--accent-dark); }
+    .badge.locked { background: var(--stone-light);  color: #5a4a30; }
+
+    .meal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: .75rem;
+    }
+
+    .meal-title { font-size: 15px; font-weight: 500; }
+    .meal-meta  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: .75rem 0; }
+
+    .signup-row  { display: flex; gap: 8px; flex-wrap: wrap; margin-top: .75rem; }
+    .cutoff-note { font-size: 12px; color: var(--text-secondary); margin-top: .5rem; }
+    .cutoff-note.urgent { color: var(--accent); }
+
+    .roster       { display: flex; flex-direction: column; gap: 6px; }
+    .roster-row   { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+    .roster-label { font-size: 12px; color: var(--text-secondary); min-width: 100px; padding-top: 2px; }
+    .roster-names { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    .chip {
+      background: var(--bg-secondary);
+      border: 0.5px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 12px;
+    }
+
+    .chip.me {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    .empty { color: var(--text-tertiary); font-size: 12px; font-style: italic; }
+    .err   { font-size: 12px; color: var(--accent); margin-top: 6px; min-height: 18px; }
+    .ok    { font-size: 12px; color: #3b6d11; }
+
+    .section-title { font-size: 16px; font-weight: 500; margin-bottom: .75rem; }
+    .no-meals      { color: var(--text-secondary); font-size: 14px; padding: .5rem 0; }
+    .loading       { color: var(--text-secondary); font-size: 14px; padding: 1.5rem 0; }
+
+    .past-section { margin-top: 2rem; }
+    .past-section .card { opacity: .6; }
+
+    @media (max-width: 480px) {
+      body   { padding: 1rem .75rem 3rem; }
+      .field { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Table 65 <span class="sync-dot" id="sync-dot" title="Connected"></span></h1>
+    <p class="subtitle">Post a meal · sign up to eat, cook, or clean</p>
+  </header>
+
+  <div class="who-bar">
+    <label for="my-name">Your name:</label>
+    <input type="text" id="my-name" placeholder="Enter your name…" style="max-width:200px;width:auto;flex:1">
+    <button onclick="saveName()">Save</button>
+    <span id="name-confirm" class="ok"></span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Post a meal</div>
+    <div class="row">
+      <div class="field" style="flex:2">
+        <label for="new-dish">Dish / meal name</label>
+        <input type="text" id="new-dish" placeholder="e.g. pasta bake for 20">
+      </div>
+      <div class="field">
+        <label for="new-dt">Date &amp; time</label>
+        <input type="datetime-local" id="new-dt">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field" style="max-width:130px">
+        <label for="new-max">Max portions</label>
+        <input type="number" id="new-max" placeholder="e.g. 25" min="1">
+      </div>
+      <div class="field">
+        <label for="new-notes">Notes (optional)</label>
+        <input type="text" id="new-notes" placeholder="vegan-friendly, bring your own bowl…">
+      </div>
+    </div>
+    <button class="primary" onclick="postMeal()">Post this meal</button>
+    <div class="err" id="post-err"></div>
+  </div>
+
+  <div style="margin-top:1.5rem">
+    <div class="section-title">Upcoming meals</div>
+    <div id="meals-list"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="past-section" id="past-section" style="display:none">
+    <div class="section-title" style="color:var(--text-secondary)">Past meals</div>
+    <div id="past-list"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // ── CONFIG ────────────────────────────────────────────────────────────────
+  // Supabase → Project Settings → API
+  const SUPABASE_URL  = 'https://jzeotxbhlvzjwmvpkapv.supabase.co';      // https://xxxxxxxx.supabase.co
+  const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY'; // eyJ...
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const db     = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  let myName   = localStorage.getItem('hcook_name') || '';
+  let meals    = [];
+
+  if (myName) document.getElementById('my-name').value = myName;
+
+  // ── LOAD ─────────────────────────────────────────────────────────────────
+
+  async function loadMeals() {
+    const { data, error } = await db
+      .from('meals')
+      .select('*')
+      .order('dt', { ascending: true });
+
+    if (error) { console.error(error); setOffline(); return; }
+    meals = data || [];
+    setOnline();
+    render();
+  }
+
+  // Realtime — any change on any device triggers a reload for everyone
+  db.channel('meals-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'meals' }, loadMeals)
+    .subscribe(status => { if (status === 'SUBSCRIBED') setOnline(); });
+
+  function setOnline()  { document.getElementById('sync-dot').className = 'sync-dot'; }
+  function setOffline() { document.getElementById('sync-dot').className = 'sync-dot offline'; }
+
+  // ── WRITE ─────────────────────────────────────────────────────────────────
+
+  async function upsertMeal(meal) {
+    const { error } = await db.from('meals').upsert({
+      id:           meal.id,
+      dish:         meal.dish,
+      dt:           meal.dt,
+      max_portions: meal.max,
+      notes:        meal.notes || '',
+      cook:         meal.cook,
+      eating:       meal.eating,
+      helping:      meal.helping,
+      cleaning:     meal.cleaning,
+    });
+    if (error) { console.error(error); setOffline(); }
+  }
+
+  async function removeMeal(id) {
+    const { error } = await db.from('meals').delete().eq('id', id);
+    if (error) { console.error(error); setOffline(); }
+  }
+
+  // ── ACTIONS ───────────────────────────────────────────────────────────────
+
+  function saveName() {
+    const v = document.getElementById('my-name').value.trim();
+    if (!v) return;
+    myName = v;
+    localStorage.setItem('hcook_name', myName);
+    const el = document.getElementById('name-confirm');
+    el.textContent = 'Saved!';
+    setTimeout(() => el.textContent = '', 2000);
+    render();
+  }
+
+  async function postMeal() {
+    const name  = document.getElementById('my-name').value.trim();
+    const dish  = document.getElementById('new-dish').value.trim();
+    const dt    = document.getElementById('new-dt').value;
+    const max   = parseInt(document.getElementById('new-max').value) || 0;
+    const notes = document.getElementById('new-notes').value.trim();
+    const err   = document.getElementById('post-err');
+
+    if (!name)                     { err.textContent = 'Set your name first.'; return; }
+    if (!dish)                     { err.textContent = 'Enter a dish name.'; return; }
+    if (!dt)                       { err.textContent = 'Pick a date and time.'; return; }
+    if (!max)                      { err.textContent = 'Enter max portions.'; return; }
+    if (new Date(dt) < new Date()) { err.textContent = 'Pick a future date and time.'; return; }
+
+    err.textContent = '';
+    myName = name;
+    localStorage.setItem('hcook_name', myName);
+
+    await upsertMeal({
+      id:      Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+      dish,    notes,    cook: name,
+      dt:      new Date(dt).toISOString(),
+      max,
+      eating:  [name],
+      helping: [],
+      cleaning:[],
+    });
+
+    document.getElementById('new-dish').value  = '';
+    document.getElementById('new-dt').value    = '';
+    document.getElementById('new-max').value   = '';
+    document.getElementById('new-notes').value = '';
+  }
+
+  async function toggle(mealId, list) {
+    if (!myName) { alert('Set your name at the top first.'); return; }
+    const row = meals.find(m => m.id === mealId);
+    if (!row) return;
+    const meal = rowToMeal(row);
+    if (isLocked(meal)) { alert('Signups are closed — less than 24 hours to go!'); return; }
+
+    const idx = meal[list].indexOf(myName);
+    if (idx >= 0) {
+      meal[list].splice(idx, 1);
+    } else {
+      if (list === 'eating' && meal.eating.length >= meal.max) {
+        alert('This meal is full!'); return;
+      }
+      meal[list].push(myName);
+    }
+    await upsertMeal(meal);
+  }
+
+  async function deleteMeal(id) {
+    const row = meals.find(m => m.id === id);
+    if (!row) return;
+    if (row.cook !== myName) { alert('Only the head cook can delete this meal.'); return; }
+    if (!confirm(`Remove "${row.dish}"?`)) return;
+    await removeMeal(id);
+  }
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+
+  function rowToMeal(row) {
+    return {
+      id:      row.id,
+      dish:    row.dish,
+      dt:      row.dt,
+      max:     row.max_portions,
+      notes:   row.notes,
+      cook:    row.cook,
+      eating:  row.eating   || [],
+      helping: row.helping  || [],
+      cleaning:row.cleaning || [],
+    };
+  }
+
+  function isLocked(meal) {
+    return Date.now() >= new Date(meal.dt).getTime() - 24 * 60 * 60 * 1000;
+  }
+
+  function cutoffText(meal) {
+    const cutoff = new Date(meal.dt).getTime() - 24 * 60 * 60 * 1000;
+    const diff   = cutoff - Date.now();
+    if (diff <= 0) return null;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    if (h >= 48) return `Signup closes in ${Math.floor(h / 24)} days`;
+    return `Signup closes in ${h}h ${m}m`;
+  }
+
+  function fmt(dtStr) {
+    const d = new Date(dtStr);
+    return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+      + ' at ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function chips(arr) {
+    if (!arr || !arr.length) return '<span class="empty">none yet</span>';
+    return arr.map(n => `<span class="chip${n === myName ? ' me' : ''}">${esc(n)}</span>`).join('');
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
+
+  function mealCard(row) {
+    const meal   = rowToMeal(row);
+    const locked = isLocked(meal);
+    const ct     = cutoffText(meal);
+    const iEat   = meal.eating.includes(myName);
+    const iHelp  = meal.helping.includes(myName);
+    const iClean = meal.cleaning.includes(myName);
+    const full   = meal.eating.length >= meal.max && !iEat;
+    const canDel = meal.cook === myName;
+    const urgent = ct && (() => { const m = ct.match(/in (\d+)h/); return m && parseInt(m[1]) < 3; })();
+
+    return `<div class="card">
+      <div class="meal-header">
+        <div>
+          <div class="meal-title">${esc(meal.dish)}</div>
+          <div class="meal-meta">
+            ${fmt(meal.dt)} &nbsp;·&nbsp; Head cook: <strong>${esc(meal.cook)}</strong>
+            &nbsp;·&nbsp; up to ${meal.max} portions
+          </div>
+          ${meal.notes ? `<div class="meal-meta">${esc(meal.notes)}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span class="badge ${locked ? 'locked' : 'open'}">${locked ? 'Signups closed' : 'Signups open'}</span>
+          ${canDel ? `<button class="danger" onclick="deleteMeal('${meal.id}')">Delete</button>` : ''}
+        </div>
+      </div>
+
+      ${!locked ? `
+        <div class="signup-row">
+          <button class="${iEat ? 'active' : ''}" onclick="toggle('${meal.id}','eating')">
+            ${iEat ? '✓ Eating' : 'Eat'} (${meal.eating.length}/${meal.max}${full ? ' · full' : ''})
+          </button>
+          <button class="${iHelp ? 'active' : ''}" onclick="toggle('${meal.id}','helping')">
+            ${iHelp ? '✓ Helping cook' : 'Help cook'} (${meal.helping.length})
+          </button>
+          <button class="${iClean ? 'active-clean' : ''}" onclick="toggle('${meal.id}','cleaning')">
+            ${iClean ? '✓ Helping clean' : 'Help clean'} (${meal.cleaning.length})
+          </button>
+        </div>
+        ${ct ? `<div class="cutoff-note${urgent ? ' urgent' : ''}">${ct}</div>` : ''}
+      ` : `
+        <div class="cutoff-note urgent">Grocery deadline passed — signups locked.</div>
+      `}
+
+      <hr class="divider">
+      <div class="roster">
+        <div class="roster-row">
+          <span class="roster-label">Eating (${meal.eating.length}):</span>
+          <div class="roster-names">${chips(meal.eating)}</div>
+        </div>
+        <div class="roster-row">
+          <span class="roster-label">Helping cook:</span>
+          <div class="roster-names">${chips(meal.helping)}</div>
+        </div>
+        <div class="roster-row">
+          <span class="roster-label">Helping clean:</span>
+          <div class="roster-names">${chips(meal.cleaning)}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function render() {
+    const now      = Date.now();
+    const upcoming = meals.filter(m => new Date(m.dt).getTime() > now - 3600000);
+    const past     = meals.filter(m => new Date(m.dt).getTime() <= now - 3600000);
+
+    document.getElementById('meals-list').innerHTML = upcoming.length
+      ? upcoming.map(mealCard).join('')
+      : '<div class="no-meals">No meals posted yet — be the first to cook!</div>';
+
+    const ps = document.getElementById('past-section');
+    if (past.length) {
+      ps.style.display = '';
+      document.getElementById('past-list').innerHTML = [...past].reverse().map(mealCard).join('');
+    } else {
+      ps.style.display = 'none';
+    }
+  }
+
+  loadMeals();
+  setInterval(render, 60000);
+</script>
+</body>
+</html>
