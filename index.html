@@ -257,6 +257,28 @@
     .no-meals      { color: var(--text-secondary); font-size: 14px; padding: .5rem 0; }
     .loading       { color: var(--text-secondary); font-size: 14px; padding: 1.5rem 0; }
 
+    .upcoming-section {
+      background: #ffffff;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      margin: 1.5rem -1rem 0;
+      padding: 1.5rem 1rem 2rem;
+      border-top: 0.5px solid var(--border-md);
+    }
+
+    .upcoming-section .section-title {
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+    }
+
+    .upcoming-section .card {
+      background: var(--bg-page);
+      border-color: rgba(46,42,40,0.10);
+    }
+
     .past-section { margin-top: 2rem; }
     .past-section .card { opacity: .6; }
 
@@ -327,14 +349,14 @@
     <div class="err" id="post-err"></div>
   </div>
 
-  <div style="margin-top:1.5rem">
+  <div class="upcoming-section">
     <div class="section-title">Upcoming meals</div>
     <div id="meals-list"><div class="loading">Loading…</div></div>
-  </div>
 
-  <div class="past-section" id="past-section" style="display:none">
-    <div class="section-title" style="color:var(--text-secondary)">Past meals</div>
-    <div id="past-list"></div>
+    <div class="past-section" id="past-section" style="display:none">
+      <div class="section-title" style="margin-top:2rem">Past meals</div>
+      <div id="past-list"></div>
+    </div>
   </div>
 
 </div>
