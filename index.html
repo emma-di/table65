@@ -297,9 +297,9 @@
 
     .upcoming-section {
       background: var(--bg);
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      margin: 1.5rem -1rem 0;
-      padding: 1.5rem 1rem 6rem;
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1.5rem 0 6rem;
       border-top: 0.5px solid var(--border-md);
       min-height: calc(100vh - 12rem);
     }
@@ -363,13 +363,13 @@
     .past-section .card { opacity: .6; }
 
     @media (max-width: 480px) {
-      body   { padding: 1rem .75rem 3rem; }
       .field { min-width: 100%; }
       .dish-row select { max-width: 90px; }
     }
   </style>
 </head>
 <body>
+<div style="padding: 2rem 1rem 0; max-width:720px; margin:0 auto">
 <div class="container">
 
   <header>
@@ -455,7 +455,11 @@
     <div class="err" id="post-err"></div>
   </div>
 
-  <div class="upcoming-section">
+  </div><!-- end .container -->
+</div><!-- end top wrapper -->
+
+<div class="upcoming-section">
+  <div class="container">
     <div id="name-bar" style="display:none; margin-bottom:1rem; padding:.75rem 1rem; background:var(--accent-light); border-radius:var(--radius); border:0.5px solid var(--accent);">
       <div style="font-size:13px;color:var(--accent-dark);margin-bottom:6px;font-weight:500;">Set your name to sign up</div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -471,7 +475,6 @@
       <div id="past-list"></div>
     </div>
   </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -560,15 +563,21 @@
   // ── SUPABASE ─────────────────────────────────────────────────────────────
 
   async function loadMeals() {
-    const { data, error } = await db
-      .from('meals')
-      .select('*')
-      .order('dt', { ascending: true });
-    if (error) { console.error(error); setOffline(); return; }
-    meals = data || [];
-    setOnline();
-    updateNameBar();
-    render();
+    try {
+      const { data, error } = await db
+        .from('meals')
+        .select('*')
+        .order('dt', { ascending: true });
+      if (error) { console.error('Supabase error:', error); setOffline(); render(); return; }
+      meals = data || [];
+      setOnline();
+      updateNameBar();
+      render();
+    } catch(e) {
+      console.error('loadMeals failed:', e);
+      setOffline();
+      render();
+    }
   }
 
   db.channel('meals-changes')
