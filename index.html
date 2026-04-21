@@ -539,6 +539,8 @@
   function updateNameBar() {
     document.getElementById('name-bar').style.display = myName ? 'none' : 'block';
   }
+
+  function toggleTag(label) {
     const cb = label.querySelector('input[type=checkbox]');
     cb.checked = !cb.checked;
     label.classList.toggle('checked', cb.checked);
