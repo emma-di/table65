@@ -296,7 +296,7 @@
     .loading       { color: var(--text-secondary); font-size: 14px; padding: 1.5rem 0; }
 
     .upcoming-section {
-      background: #ffffff;
+      background: var(--bg);
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
       margin: 1.5rem -1rem 0;
       padding: 1.5rem 1rem 6rem;
@@ -456,6 +456,13 @@
   </div>
 
   <div class="upcoming-section">
+    <div id="name-bar" style="display:none; margin-bottom:1rem; padding:.75rem 1rem; background:var(--accent-light); border-radius:var(--radius); border:0.5px solid var(--accent);">
+      <div style="font-size:13px;color:var(--accent-dark);margin-bottom:6px;font-weight:500;">Set your name to sign up</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="quick-name" placeholder="Your name…" style="max-width:180px;flex:1">
+        <button onclick="saveQuickName()" class="primary" style="flex-shrink:0">Save</button>
+      </div>
+    </div>
     <div class="section-title">Upcoming meals</div>
     <div id="meals-list"><div class="loading">Loading…</div></div>
 
@@ -515,7 +522,20 @@
     })).filter(d => d.name);
   }
 
-  function toggleTag(label) {
+  function saveQuickName() {
+    const v = document.getElementById('quick-name').value.trim();
+    if (!v) return;
+    myName = v;
+    localStorage.setItem('hcook_name', myName);
+    document.getElementById('my-name').value = myName;
+    document.getElementById('name-bar').style.display = 'none';
+    render();
+  }
+
+  // show name bar if no name saved
+  function updateNameBar() {
+    document.getElementById('name-bar').style.display = myName ? 'none' : 'block';
+  }
     const cb = label.querySelector('input[type=checkbox]');
     cb.checked = !cb.checked;
     label.classList.toggle('checked', cb.checked);
@@ -547,6 +567,7 @@
     if (error) { console.error(error); setOffline(); return; }
     meals = data || [];
     setOnline();
+    updateNameBar();
     render();
   }
 
@@ -623,10 +644,9 @@
 
   async function toggle(mealId, list) {
     if (!myName) {
-      const v = window.prompt('What\'s your name?');
-      if (!v || !v.trim()) return;
-      myName = v.trim();
-      localStorage.setItem('hcook_name', myName);
+      document.getElementById('name-bar').style.display = 'block';
+      document.getElementById('quick-name').focus();
+      return;
     }
     const row  = meals.find(m => m.id === mealId);
     if (!row) return;
@@ -731,19 +751,19 @@
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <span class="badge ${locked ? 'locked' : 'open'}">${locked ? 'Signups closed' : 'Signups open'}</span>
-          ${canDel ? `<button class="danger" onclick="deleteMeal('${meal.id}')">Delete</button>` : ''}
+          ${canDel ? `<button class="danger" data-action="delete" data-id="${meal.id}">Delete</button>` : ''}
         </div>
       </div>
 
       ${!locked ? `
         <div class="signup-row">
-          <button class="${iEat ? 'active' : ''}" onclick="toggle('${meal.id}','eating')">
+          <button class="${iEat ? 'active' : ''}" data-action="toggle" data-id="${meal.id}" data-list="eating">
             ${iEat ? '✓ Eating' : 'Eat'} (${meal.eating.length})
           </button>
-          <button class="${iHelp ? 'active' : ''}" onclick="toggle('${meal.id}','helping')">
+          <button class="${iHelp ? 'active' : ''}" data-action="toggle" data-id="${meal.id}" data-list="helping">
             ${iHelp ? '✓ Helping cook' : 'Help cook'} (${meal.helping.length})
           </button>
-          <button class="${iClean ? 'active-clean' : ''}" onclick="toggle('${meal.id}','cleaning')">
+          <button class="${iClean ? 'active-clean' : ''}" data-action="toggle" data-id="${meal.id}" data-list="cleaning">
             ${iClean ? '✓ Helping clean' : 'Help clean'} (${meal.cleaning.length})
           </button>
         </div>
@@ -828,6 +848,16 @@
 
   loadMeals();
   setInterval(render, 60000);
+
+  // event delegation for dynamically rendered buttons — works reliably on mobile
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id     = btn.dataset.id;
+    if (action === 'toggle') toggle(id, btn.dataset.list);
+    if (action === 'delete') deleteMeal(id);
+  });
 </script>
 </body>
 </html>
